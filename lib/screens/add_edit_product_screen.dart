@@ -18,6 +18,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   final _entryDateCtrl = TextEditingController();
   final _expDateCtrl = TextEditingController();
   final _productService = ProductService();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -37,6 +38,18 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.green,
+              onPrimary: Colors.white,
+              onSurface: Colors.green,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       ctrl.text = DateFormat('yyyy-MM-dd').format(picked);
@@ -45,6 +58,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
   void _save() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
       final data = {
         'name': _nameCtrl.text,
         'price': _priceCtrl.text,
@@ -62,60 +76,155 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
           data,
         );
       }
+      setState(() => _isLoading = false);
 
-      if (success) Navigator.pop(context);
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Data Berhasil Disimpan"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
     }
+  }
+
+  InputDecoration _inputStyle(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: Colors.green),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.green.shade200),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.green, width: 2),
+      ),
+      filled: true,
+      fillColor: Colors.white,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: Text(
           widget.product == null ? "Tambah Inventaris" : "Edit Inventaris",
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
             children: [
-              TextFormField(
-                controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: "Nama Barang"),
-                validator: (v) => v!.isEmpty ? 'Isi nama' : null,
-              ),
-              TextFormField(
-                controller: _priceCtrl,
-                decoration: const InputDecoration(labelText: "Harga"),
-                keyboardType: TextInputType.number,
-                validator: (v) => v!.isEmpty ? 'Isi harga' : null,
-              ),
-              TextFormField(
-                controller: _qtyCtrl,
-                decoration: const InputDecoration(labelText: "Jumlah"),
-                keyboardType: TextInputType.number,
-                validator: (v) => v!.isEmpty ? 'Isi jumlah' : null,
-              ),
-              TextFormField(
-                controller: _entryDateCtrl,
-                decoration: const InputDecoration(labelText: "Tanggal Masuk"),
-                readOnly: true,
-                onTap: () => _pickDate(_entryDateCtrl),
-                validator: (v) => v!.isEmpty ? 'Isi tanggal' : null,
-              ),
-              TextFormField(
-                controller: _expDateCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Tanggal Kedaluwarsa",
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                readOnly: true,
-                onTap: () => _pickDate(_expDateCtrl),
-                validator: (v) => v!.isEmpty ? 'Isi tanggal' : null,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _nameCtrl,
+                        decoration: _inputStyle("Nama Barang", Icons.inventory),
+                        validator: (v) =>
+                            v!.isEmpty ? 'Nama wajib diisi' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _priceCtrl,
+                        decoration: _inputStyle(
+                          "Harga (Rp)",
+                          Icons.monetization_on,
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (v) =>
+                            v!.isEmpty ? 'Harga wajib diisi' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _qtyCtrl,
+                        decoration: _inputStyle("Jumlah Stok", Icons.numbers),
+                        keyboardType: TextInputType.number,
+                        validator: (v) =>
+                            v!.isEmpty ? 'Jumlah wajib diisi' : null,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(onPressed: _save, child: const Text("Simpan")),
+              const SizedBox(height: 16),
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _entryDateCtrl,
+                        decoration: _inputStyle(
+                          "Tanggal Masuk",
+                          Icons.calendar_today,
+                        ),
+                        readOnly: true,
+                        onTap: () => _pickDate(_entryDateCtrl),
+                        validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _expDateCtrl,
+                        decoration: _inputStyle(
+                          "Tanggal Kedaluwarsa",
+                          Icons.event_busy,
+                        ),
+                        readOnly: true,
+                        onTap: () => _pickDate(_expDateCtrl),
+                        validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _save,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 5,
+                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "SIMPAN DATA",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ),
             ],
           ),
         ),
