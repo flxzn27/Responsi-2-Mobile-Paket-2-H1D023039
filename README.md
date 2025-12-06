@@ -15,8 +15,156 @@ Aplikasi Mobile Flutter yang terhubung penuh dengan REST API (Laravel Sanctum) u
 
 **Nama** : Alfan Fauzan Ridlo  
 **NIM** : H1D023039  
-**Shift** : (Isi Shift Asal Anda)  
-**Shift Baru** : (Isi Shift Responsi Anda)
+**Shift** : C
+**Shift Baru** : B
+## SPESIFIKASI API
+Berikut adalah dokumentasi REST API yang digunakan dalam aplikasi ini, dibangun menggunakan Framework **Laravel**.
+
+### A. Autentikasi
+
+#### 1. Registrasi
+* **Endpoint:** `/register`
+* **Method:** `POST`
+* **Header:** `Content-Type: application/json`
+* **Body:**
+    ```json
+    {
+        "name": "Alfan Fauzan",
+        "email": "alfan@example.com",
+        "password": "password123"
+    }
+    ```
+* **Response:**
+    ```json
+    {
+        "message": "Register success",
+        "access_token": "1|PyDnQ...",
+        "token_type": "Bearer"
+    }
+    ```
+
+#### 2. Login
+* **Endpoint:** `/login`
+* **Method:** `POST`
+* **Header:** `Content-Type: application/json`
+* **Body:**
+    ```json
+    {
+        "email": "alfan@example.com",
+        "password": "password123"
+    }
+    ```
+* **Response:**
+    ```json
+    {
+        "message": "Login success",
+        "access_token": "2|HsJk...",
+        "token_type": "Bearer",
+        "user": {
+            "id": 1,
+            "name": "Alfan Fauzan",
+            "email": "alfan@example.com"
+        }
+    }
+    ```
+
+#### 3. Logout
+* **Endpoint:** `/logout`
+* **Method:** `POST`
+* **Header:** * `Content-Type: application/json`
+    * `Authorization: Bearer <token>`
+* **Response:**
+    ```json
+    {
+        "message": "Logged out successfully"
+    }
+    ```
+
+### B. Produk (Inventaris)
+
+#### 1. List Produk (Read)
+* **Endpoint:** `/products`
+* **Method:** `GET`
+* **Header:** `Authorization: Bearer <token>`
+* **Response:**
+    ```json
+    {
+        "status": true,
+        "message": "Data ditemukan",
+        "data": [
+            {
+                "id": 1,
+                "name": "Tepung Terigu",
+                "price": 12000,
+                "quantity": 50,
+                "entry_date": "2024-12-01",
+                "expired_date": "2025-12-01"
+            }
+        ]
+    }
+    ```
+
+#### 2. Tambah Produk (Create)
+* **Endpoint:** `/products`
+* **Method:** `POST`
+* **Header:** * `Content-Type: application/json`
+    * `Authorization: Bearer <token>`
+* **Body:**
+    ```json
+    {
+        "name": "Gula Pasir",
+        "price": 15000,
+        "quantity": 20,
+        "entry_date": "2024-12-06",
+        "expired_date": "2025-06-01"
+    }
+    ```
+* **Response:**
+    ```json
+    {
+        "status": true,
+        "message": "Barang berhasil ditambahkan",
+        "data": { ... }
+    }
+    ```
+
+#### 3. Update Produk (Edit)
+* **Endpoint:** `/products/{id}`
+* **Method:** `PUT`
+* **Header:** * `Content-Type: application/json`
+    * `Authorization: Bearer <token>`
+* **Body:**
+    ```json
+    {
+        "name": "Gula Pasir Premium",
+        "price": 18000,
+        "quantity": 20,
+        "entry_date": "2024-12-06",
+        "expired_date": "2025-06-01"
+    }
+    ```
+* **Response:**
+    ```json
+    {
+        "status": true,
+        "message": "Barang berhasil diupdate",
+        "data": { ... }
+    }
+    ```
+
+#### 4. Hapus Produk (Delete)
+* **Endpoint:** `/products/{id}`
+* **Method:** `DELETE`
+* **Header:** `Authorization: Bearer <token>`
+* **Response:**
+    ```json
+    {
+        "status": true,
+        "message": "Barang berhasil dihapus"
+    }
+    ```
+
+---
 
 # FITUR UTAMA
 
